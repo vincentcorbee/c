@@ -1,0 +1,43 @@
+IDIR = include
+SRCDIR = src
+ODIR = obj
+BDIR = bin
+
+CC = gcc
+CFLAGS = -I $(IDIR) -Wall -g
+
+LIB =
+DEF = -DDEBUG_FLAG -DEXPERIMENTAL=0
+BIN = $(BDIR)/recursive-descent-parser
+
+# List of source files (located in the src/ directory)
+SRCS = $(wildcard $(SRCDIR)/*.c)
+
+# Exclude the main program file from the list of source files
+# SRCS := $(filter-out $(SRCDIR)/recursive-descent-parser.c, $(SRCS))
+
+# Generate object file names with the "obj/" prefix
+OBJS = $(patsubst $(SRCDIR)/%.c, $(ODIR)/%.o, $(SRCS))
+
+# Rule to create the "obj" directory if it doesn't exist
+$(shell mkdir -p $(ODIR))
+
+# Rule to create the "out" directory if it doesn't exist
+$(shell mkdir -p $(BDIR))
+
+# Rule to compile each module into its object file in the "obj/" directory
+$(ODIR)/%.o: $(SRCDIR)/%.c
+	$(CC) -c $(CFLAGS) $(DEF) $< -o $@
+
+# Rule to compile the executable program
+$(BIN): $(OBJS)
+	$(CC) $(CFLAGS) $(DEF) $(LIB) $(OBJS) -o $(BIN)
+
+.PHONY: clean
+
+clean:
+	rm -rf *~ $(ODIR) $(BDIR)
+
+depend:
+	makedepend -Y -- $(CFLAGS) $(DEFS) -- $(SRCDIR)/*.c
+
