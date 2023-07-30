@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Including own header for checking by compiler */
 #define parser_IMPORT
 
+#include "lexer.h"
 #include "parser.h"
 
 /* Private functions */
@@ -66,7 +66,13 @@ void visitNode(Node *node, size_t indent)
   }
 }
 
-Node *parse(char **input)
+Node *parse(char **source)
 {
-  return program(input);
+  Lexer *lexer = lexerFactory(source);
+
+  Node *tree = program(source);
+
+  free(lexer);
+
+  return tree;
 }

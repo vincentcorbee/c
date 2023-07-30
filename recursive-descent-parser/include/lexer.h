@@ -16,6 +16,7 @@ typedef struct Lexer Lexer;
 
 typedef struct Lexer
 {
+  int index;
   int col;
   int line;
   char **source;

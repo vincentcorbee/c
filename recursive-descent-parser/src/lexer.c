@@ -15,6 +15,7 @@ Lexer *lexerFactory(char **source)
 {
   Lexer *lexer = malloc(sizeof(Lexer));
 
+  lexer->index = 0;
   lexer->col = 0;
   lexer->line = 0;
   lexer->source = source;
@@ -37,6 +38,8 @@ char *eatChar(Lexer *self, int count)
     string[index++] = eat(self->source);
 
     self->col++;
+
+    self->index++;
   }
 
   string[index] = '\0';
@@ -52,6 +55,8 @@ char *eatIdentiferStart(Lexer *self)
 
   int col = self->col;
 
+  int previousIndex = self->index;
+
   char *idenifier = malloc(sizeof(char));
 
   while (hasData(self->source) && isAsciiAz(**self->source))
@@ -61,6 +66,8 @@ char *eatIdentiferStart(Lexer *self)
     idenifier[index++] = eat(self->source);
 
     self->col++;
+
+    self->index++;
   }
 
   if (index == 0)
@@ -68,6 +75,8 @@ char *eatIdentiferStart(Lexer *self)
     free(idenifier);
 
     self->col = col;
+
+    self->index = previousIndex;
 
     *self->source = source;
 
@@ -85,6 +94,8 @@ char *eatDoubleQuotedString(Lexer *self)
 
   int col = self->col;
 
+  int previousIndex = self->index;
+
   char *source = *self->source;
 
   char *string = malloc(sizeof(char));
@@ -98,6 +109,8 @@ char *eatDoubleQuotedString(Lexer *self)
     string[index++] = eat(self->source);
 
     self->col++;
+
+    self->index++;
   };
 
   if (!isDoubleQuotedString(**self->source))
@@ -105,6 +118,8 @@ char *eatDoubleQuotedString(Lexer *self)
     free(string);
 
     self->col = col;
+
+    self->index = previousIndex;
 
     *self->source = source;
 
@@ -131,6 +146,8 @@ char *eatInteger(Lexer *self)
     value[index++] = eat(self->source);
 
     self->col++;
+
+    self->index++;
   };
 
   value[index] = '\0';
@@ -158,6 +175,8 @@ Token *tokenFactory(Lexer *self, TokenType type)
     token->value = eatIdentiferStart(self);
 
     return token;
+  case LogicalAnd:
+  case LogicalOr:
   case EqualEqual:
   case NotEqual:
     token->value = eatChar(self, 2);
@@ -171,6 +190,8 @@ Token *tokenFactory(Lexer *self, TokenType type)
   case Equal:
   case Not:
   case Semicolon:
+  case BinaryOr:
+  case BinaryAnd:
     token->value = eatChar(self, 1);
 
     return token;
@@ -213,6 +234,22 @@ Token *nextToken(Lexer *self)
 
   if (isMultiply(nextChar))
     return tokenFactory(self, Multiply);
+
+  if (isBinaryAnd(nextChar))
+  {
+    if (isBinaryAnd(peekAt(self->source, 1)))
+      return tokenFactory(self, LogicalAnd);
+
+    return tokenFactory(self, BinaryAnd);
+  }
+
+  if (isBinaryOr(nextChar))
+  {
+    if (isBinaryOr(peekAt(self->source, 1)))
+      return tokenFactory(self, LogicalOr);
+
+    return tokenFactory(self, LogicalAnd);
+  }
 
   if (isNot(nextChar))
   {

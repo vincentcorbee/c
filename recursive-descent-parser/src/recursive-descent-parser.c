@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
   input = NULL;
 
-  char *test = "i=10;+-\"string\"*! != ==;   ";
+  char *test = "i=10;+-\"string\"*! != ==; | || && &";
 
   Lexer *lexer = lexerFactory(&test);
 

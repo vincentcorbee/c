@@ -14,6 +14,20 @@ int isEOF(char c);
 
 int hasData(char **input);
 
+char eat(char **input);
+
+char peek(char **input);
+
+char peekAt(char **input, int pos);
+
+void eatWhiteSpace(char **input);
+
+void eatNewline(char **input);
+
+void eatWhiteSpaceAndNewline(char **input);
+
+/* Tokens */
+
 int isInteger(char c);
 
 int isNewline(char c);
@@ -38,21 +52,13 @@ int isNot(char c);
 
 int isSemicolon(char c);
 
+int isBinaryOr(char c);
+
+int isBinaryAnd(char c);
+
 int isDoubleQuotedString(char c);
 
-char eat(char **input);
-
-char peek(char **input);
-
-char peekAt(char **input, int pos);
-
 int isWhiteSpace(char c);
-
-void eatWhiteSpace(char **input);
-
-void eatNewline(char **input);
-
-void eatWhiteSpaceAndNewline(char **input);
 
 #undef helpers_IMPORT
 #undef EXTERN

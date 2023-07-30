@@ -74,6 +74,16 @@ int isMultiply(char c)
   return c == '*';
 }
 
+int isBinaryAnd(char c)
+{
+  return c == '&';
+}
+
+int isBinaryOr(char c)
+{
+  return c == '|';
+}
+
 int isSemicolon(char c)
 {
   return c == ';';

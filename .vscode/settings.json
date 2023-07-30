@@ -12,6 +12,8 @@
     "system_error": "c",
     "tuple": "c",
     "type_traits": "c",
-    "vector": "c"
-  }
+    "vector": "c",
+    "linked-list.h": "c"
+  },
+  "C_Cpp.dimInactiveRegions": false
 }
