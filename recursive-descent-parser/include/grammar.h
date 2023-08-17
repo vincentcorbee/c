@@ -1,57 +1,121 @@
 #ifndef grammar_H
 #define grammar_H
 
-/* Set EXTERN macro */
 #ifdef grammar_IMPORT
-#define GRAMMER_EXTERN
+#define GRAMMAR_EXTERN
 #else
-#define GRAMMER_EXTERN extern
+#define GRAMMAR_EXTERN extern
 #endif
 
 #include "node.h"
+#include "lexer.h"
 
-Node *program(char **input);
+/* Types */
 
-LinkedList *statements(char **input);
+Node *typeAnnotation(Lexer *lexer);
+Node *type(Lexer *lexer);
+Node *unionType(Lexer *lexer);
+Node *intersectionType(Lexer *lexer);
+Node *primaryType(Lexer *lexer);
+Node *predefinedType(Lexer *lexer);
+Node *arrayType(Lexer *lexer, Node *pt);
+Node *tupleType(Lexer *lexer);
+Node *tupleList(Lexer *lexer);
+Node *tupleItem(Lexer *lexer);
+Node *typeReference(Lexer *lexer);
+Node *TypeLiteral(Lexer *lexer);
+Node *typeBody(Lexer *lexer);
+Node *typeMemberList(Lexer *lexer);
+Node *typeMember(Lexer *lexer);
+Node *propertySignature(Lexer *lexer);
+Node *callSignature(Lexer *lexer);
+Node *parameterList(Lexer *lexer);
+Node *requiredParameterList(Lexer *lexer);
+Node *requiredParameter(Lexer *lexer);
+Node *propertyName(Lexer *lexer);
+Node *typeParameters(Lexer *lexer);
+Node *typeParameterList(Lexer *lexer);
+Node *typeParameter(Lexer *lexer);
 
-Node *statement(char **input);
+Node *variableDeclaration(Lexer *lexer);
+Node *letOrConst(Lexer *lexer);
+Node *variableBinding(Lexer *lexer);
+Node *initializer(Lexer *lexer);
 
-Node *expressionStatement(char **input);
+Node *program(Lexer *lexer);
 
-Node *primaryExpression(char **input);
+Node *statements(Lexer *lexer);
 
-Node *expression(char **input);
+Node *statementItem(Lexer *lexer);
 
-Node *assignmentExpression(char **input);
+Node *blockStatement(Lexer *lexer);
 
-Node *leftHandSideExpression(char **input);
+Node *declaration(Lexer *lexer);
 
-Node *memberExpression(char **input);
+Node *functionDeclaration(Lexer *lexer);
 
-Node *conditionalExpression(char **input);
+Node *arrowFunctionBody(Lexer *lexer);
 
-Node *equalityExpression(char **input);
+Node *functionBody(Lexer *lexer);
 
-Node *logicalAndExpression(char **input);
+Node *functionParameters(Lexer *lexer);
 
-Node *logicalOrExpression(char **input);
+Node *functionParametersList(Lexer *lexer);
 
-Node *additiveExpression(char **input);
+Node *bindingList(Lexer *lexer);
 
-Node *multiplicativeExpression(char **input);
+Node *lexicalBinding(Lexer *lexer);
 
-Node *numericLiteral(char **input);
+Node *statement(Lexer *lexer);
 
-Node *stringLiteral(char **input);
+Node *expressionStatement(Lexer *lexer);
 
-Node *literal(char **input);
+Node *primaryExpression(Lexer *lexer);
 
-Node *identifier(char **input);
+Node *expression(Lexer *lexer);
 
-char *identifierStart(char **input);
+Node *assignmentExpression(Lexer *lexer);
 
-Node *coverParenthesizedExpression(char **input);
+Node *leftHandSideExpression(Lexer *lexer);
 
-#undef gramma_IMPORT
-#undef GRAMMER_EXTERN
+Node *memberExpression(Lexer *lexer);
+
+Node *conditionalExpression(Lexer *lexer);
+
+Node *equalityExpression(Lexer *lexer);
+
+Node *logicalAndExpression(Lexer *lexer);
+
+Node *logicalOrExpression(Lexer *lexer);
+
+Node *additiveExpression(Lexer *lexer);
+
+Node *multiplicativeExpression(Lexer *lexer);
+
+Node *numericLiteral(Lexer *lexer);
+
+Node *stringLiteral(Lexer *lexer);
+
+Node *literal(Lexer *lexer);
+
+Node *lexicalBinding(Lexer *lexer);
+
+Node *bindingIdentifier(Lexer *lexer);
+
+Node *identifier(Lexer *lexer);
+
+char *identifierStart(Lexer *lexer);
+
+Node *coverParenthesizedExpression(Lexer *lexer);
+
+Node *accessibiltyModifier(Lexer *lexer);
+
+Node *functionParameter(Lexer *lexer);
+
+Node *arguments(Lexer *lexer);
+Node *argumentsList(Lexer *lexer);
+Node *callExpression(Lexer *lexer);
+
+#undef grammar_IMPORT
+#undef GRAMMAR_EXTERN
 #endif

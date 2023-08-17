@@ -3,7 +3,6 @@
 
 #include "token.h"
 
-/* Set EXTERN macro: */
 #ifdef lexer_IMPORT
 #define EXTERN
 #else
@@ -21,24 +20,63 @@ typedef struct Lexer
   int line;
   char **source;
   Token *(*next)(Lexer *self);
-  Token *(*peek)(Lexer *self);
+  TokenType (*peek)(Lexer *self);
+  void (*skip)(Lexer *self, int count);
+  void (*advance)(Lexer *self);
+  char *(*eatChar)(Lexer *self, int count);
 } Lexer;
+
+typedef const char *Keywords[];
+
+typedef struct LexerState
+{
+  int index;
+  int col;
+  int line;
+  char *source;
+} LexerState;
 
 /* Function prototypes */
 
 Lexer *lexerFactory(char **source);
 
-Token *peekToken(Lexer *self);
+Token *tokenFactory(Lexer *self, TokenType type, char *value);
+
+TokenType peekToken(Lexer *self);
 
 Token *nextToken(Lexer *self);
 
-Token *tokenFactory(Lexer *self, TokenType type);
+void skipToken(Lexer *self, int count);
+
+void advanceToken(Lexer *self);
 
 char *eatDoubleQuotedString(Lexer *self);
 
 char *eatInteger(Lexer *self);
 
+char *eatKeyword(Lexer *self, Keyword keywordType);
+
 char *eatChar(Lexer *self, int count);
+
+LexerState getLexerState(Lexer *self);
+
+void setLexerState(Lexer *self, LexerState state);
+
+/* Keywords */
+
+int isKeywordFunc(Lexer *self);
+
+int isKeywordTypeAlias(Lexer *self);
+
+int isKeywordPublic(Lexer *self);
+
+int isKeywordPrivate(Lexer *self);
+
+int isKeywordString(Lexer *self);
+
+int isKeywordNumber(Lexer *self);
+
+int isKeyword(Lexer *self, Keyword keywordType);
 
 #undef lexer_IMPORT
 #undef EXTERN

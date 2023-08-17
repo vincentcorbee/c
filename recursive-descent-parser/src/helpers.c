@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Including own header for checking by compiler */
+#include "token.h"
+
 #define helpers_IMPORT
 
 #include "helpers.h"
@@ -39,19 +40,19 @@ int isNewline(char c)
   return c == '\n';
 }
 
-int isLeftParen(char c)
-{
-  return c == '(';
-}
-
-int isRightParen(char c)
-{
-  return c == ')';
-}
-
 int isEqual(char c)
 {
   return c == '=';
+}
+
+int isRightAngleBracket(char c)
+{
+  return c == '>';
+}
+
+int isLeftAngleBracket(char c)
+{
+  return c == '<';
 }
 
 int isNot(char c)
@@ -84,11 +85,6 @@ int isBinaryOr(char c)
   return c == '|';
 }
 
-int isSemicolon(char c)
-{
-  return c == ';';
-}
-
 int isDoubleQuotedString(char c)
 {
   return c == '"';
@@ -99,16 +95,32 @@ int isWhiteSpace(char c)
   return c == ' ';
 }
 
-void eatWhiteSpace(char **input)
+int eatWhiteSpace(char **input)
 {
+  int count = 0;
+
   while (isWhiteSpace(**input))
+  {
     eat(input);
+
+    count++;
+  }
+
+  return count;
 }
 
-void eatNewline(char **input)
+int eatNewline(char **input)
 {
+  int count = 0;
+
   while (isNewline(**input))
+  {
     eat(input);
+
+    count++;
+  }
+
+  return count;
 }
 
 void eatWhiteSpaceAndNewline(char **input)
@@ -129,5 +141,10 @@ char peek(char **input)
 
 char peekAt(char **input, int pos)
 {
-  return *(*input + 1);
+  return *(*input + pos);
+}
+
+char skip(char **input, int count)
+{
+  return **input + count;
 }

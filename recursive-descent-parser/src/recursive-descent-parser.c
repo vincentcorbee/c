@@ -9,6 +9,32 @@
 
 #define INITIAL_SIZE 10
 
+void tokenize(Lexer *lexer)
+{
+  Token *token = NULL;
+
+  // token = peekToken(lexer);
+
+  // if(token != NULL) {
+  //   printf("token: %s\n", token->value);
+  //   free(token->value);
+  //   free(token);
+  // }
+
+  while ((token = lexer->next(lexer)) != NULL)
+  {
+    char *value = token->value;
+
+    printf("token: %s\n", value);
+
+    freeToken(token);
+  }
+
+  printf("column %d\n", lexer->col);
+
+  free(lexer);
+}
+
 int main(int argc, char *argv[])
 {
   char *input = malloc(INITIAL_SIZE * sizeof(char));
@@ -70,30 +96,11 @@ int main(int argc, char *argv[])
 
   input = NULL;
 
-  char *test = "i=10;+-\"string\"*! != ==; | || && &";
+  // char *test = "i=10;+-\"string\"*! != ==; | || && & func :,<>?{}()[]=>";
 
-  Lexer *lexer = lexerFactory(&test);
+  // Lexer *lexer = lexerFactory(&test);
 
-  Token *token = NULL;
-
-  // token = peekToken(lexer);
-
-  // if(token != NULL) {
-  //   printf("token: %s\n", token->value);
-  //   free(token->value);
-  //   free(token);
-  // }
-
-  while ((token = lexer->next(lexer)) != NULL)
-  {
-    printf("token: %s\n", token->value);
-    free(token->value);
-    free(token);
-  }
-
-  free(lexer);
-
-  printf("column %d\n", lexer->col);
+  // tokenize(lexer);
 
   return 0;
 }

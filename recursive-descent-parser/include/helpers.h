@@ -20,9 +20,11 @@ char peek(char **input);
 
 char peekAt(char **input, int pos);
 
-void eatWhiteSpace(char **input);
+char skip(char **input, int count);
 
-void eatNewline(char **input);
+int eatWhiteSpace(char **input);
+
+int eatNewline(char **input);
 
 void eatWhiteSpaceAndNewline(char **input);
 
@@ -36,21 +38,9 @@ int isAsciiAz(char c);
 
 int isIdentifierStart(char c);
 
-int isPlus(char c);
-
-int isMinus(char c);
-
-int isMultiply(char c);
-
-int isLeftParen(char c);
-
-int isRightParen(char c);
-
 int isEqual(char c);
 
 int isNot(char c);
-
-int isSemicolon(char c);
 
 int isBinaryOr(char c);
 
@@ -59,6 +49,10 @@ int isBinaryAnd(char c);
 int isDoubleQuotedString(char c);
 
 int isWhiteSpace(char c);
+
+int isRightAngleBracket(char c);
+
+int isLeftAngleBracket(char c);
 
 #undef helpers_IMPORT
 #undef EXTERN
