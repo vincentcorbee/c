@@ -13,7 +13,27 @@
     "tuple": "c",
     "type_traits": "c",
     "vector": "c",
-    "linked-list.h": "c"
+    "linked-list.h": "c",
+    "lexer.h": "c",
+    "token.h": "c",
+    "helpers.h": "c",
+    "array": "c",
+    "string": "c",
+    "string_view": "c",
+    "node.h": "c",
+    "istream": "c",
+    "__availability": "c",
+    "__errc": "c",
+    "__hash_table": "c",
+    "__locale": "c",
+    "__tuple": "c",
+    "ios": "c",
+    "locale": "c",
+    "sstream": "c",
+    "cstdio": "c",
+    "unistd.h": "c",
+    "in.h": "c",
+    "socket.h": "c"
   },
   "C_Cpp.dimInactiveRegions": false
 }
