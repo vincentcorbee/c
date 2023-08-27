@@ -20,6 +20,62 @@ int hasData(char **input)
   return strlen(*input) > 0;
 }
 
+int eatWhiteSpace(char **input)
+{
+  int count = 0;
+
+  while (isWhiteSpace(**input))
+  {
+    eat(input);
+
+    count++;
+  }
+
+  return count;
+}
+
+int eatNewline(char **input)
+{
+  int count = 0;
+
+  while (isNewline(**input))
+  {
+    eat(input);
+
+    count++;
+  }
+
+  return count;
+}
+
+void eatWhiteSpaceAndNewline(char **input)
+{
+  while (isWhiteSpace(**input) || isNewline(**input))
+    eat(input);
+}
+
+char eat(char **input)
+{
+  return *(*input)++;
+}
+
+char peek(char **input)
+{
+  return **input;
+}
+
+char peekAt(char **input, int pos)
+{
+  return *(*input + pos);
+}
+
+char skip(char **input, int count)
+{
+  return **input + count;
+}
+
+/* Tokens */
+
 int isInteger(char c)
 {
   return c >= '0' && c <= '9';
@@ -90,61 +146,12 @@ int isDoubleQuotedString(char c)
   return c == '"';
 }
 
+int isDivision(char c)
+{
+  return c == '/';
+}
+
 int isWhiteSpace(char c)
 {
   return c == ' ';
-}
-
-int eatWhiteSpace(char **input)
-{
-  int count = 0;
-
-  while (isWhiteSpace(**input))
-  {
-    eat(input);
-
-    count++;
-  }
-
-  return count;
-}
-
-int eatNewline(char **input)
-{
-  int count = 0;
-
-  while (isNewline(**input))
-  {
-    eat(input);
-
-    count++;
-  }
-
-  return count;
-}
-
-void eatWhiteSpaceAndNewline(char **input)
-{
-  while (isWhiteSpace(**input) || isNewline(**input))
-    eat(input);
-}
-
-char eat(char **input)
-{
-  return *(*input)++;
-}
-
-char peek(char **input)
-{
-  return **input;
-}
-
-char peekAt(char **input, int pos)
-{
-  return *(*input + pos);
-}
-
-char skip(char **input, int count)
-{
-  return **input + count;
 }

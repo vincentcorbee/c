@@ -42,6 +42,14 @@ int isEqual(char c);
 
 int isNot(char c);
 
+int isMultiply(char c);
+
+int isMinus(char c);
+
+int isPlus(char c);
+
+int isDivision(char c);
+
 int isBinaryOr(char c);
 
 int isBinaryAnd(char c);

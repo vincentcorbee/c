@@ -1,1 +1,1 @@
-func calculate(a: number, b: number): number => a + b
+func calculate(a: number, b: number): number => a + b;

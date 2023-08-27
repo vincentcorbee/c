@@ -13,6 +13,33 @@ static void createIdentation(size_t indent)
   for (int i = 0; i < indent; i++)
     putchar(' ');
 }
+
+/* Node print functions */
+
+static void printEmptyStatement(Node *node, size_t indent)
+{
+  printf("EmptyStatement\n");
+}
+
+static void returnEmptyStatement(Node *node, size_t indent)
+{
+  printf("ReturnStatement {\n");
+
+  createIdentation(indent + 1);
+
+  printf("argument: {\n");
+
+  visitNode(node->data.returnStatement.argument, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
 static void printList(NodeList *list, size_t indent)
 {
   LinkedListNode *current = list->head;
@@ -24,6 +51,7 @@ static void printList(NodeList *list, size_t indent)
     current = current->next;
   }
 }
+
 static void printFunctionDeclaration(Node *node, size_t indent)
 {
   printf("FunctionDeclaration {\n");
@@ -40,30 +68,39 @@ static void printFunctionDeclaration(Node *node, size_t indent)
 
   createIdentation(indent + 1);
 
+  printf("typeParameters: {");
+
+  visitNode(node->data.functionDeclaration.typeParameters, indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
   printf("params: [");
 
-  NodeList *params = node->data.functionDeclaration.params;
-
-  if (params->count > 0)
-  {
-    printf("\n");
-
-    printList(node->data.functionDeclaration.params, indent + 2);
-
-    createIdentation(indent + 1);
-  }
+  visitNode(node->data.functionDeclaration.params, indent + 1);
 
   printf("]\n");
 
   createIdentation(indent + 1);
 
-  printf("body: [\n");
+  printf("returnType: { \n");
 
-  printList(node->data.functionDeclaration.body, indent + 2);
+  visitNode(node->data.functionDeclaration.returnType, indent + 2);
 
   createIdentation(indent + 1);
 
-  printf("]\n");
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
+  printf("body: {\n");
+
+  visitNode(node->data.functionDeclaration.body, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
 
   createIdentation(indent);
 
@@ -84,14 +121,7 @@ static void printTypeAliasDeclaration(Node *node, size_t indent)
 
   printf("typeParameters: [");
 
-  if (node->data.typeAliasDeclaration.typeParameters->count != 0)
-  {
-    printf("\n");
-
-    printList(node->data.typeAliasDeclaration.typeParameters, indent + 2);
-
-    createIdentation(indent + 1);
-  }
+  visitNode(node->data.typeAliasDeclaration.typeParameters, indent + 1);
 
   printf("]\n");
 
@@ -128,14 +158,7 @@ static void printTypeReference(Node *node, size_t indent)
 
   printf("typeParameters: [");
 
-  if (node->data.typeReference.typeParameters->count != 0)
-  {
-    printf("\n");
-
-    printList(node->data.typeReference.typeParameters, indent + 2);
-
-    createIdentation(indent + 1);
-  }
+  visitNode(node->data.typeReference.typeParameters, indent + 1);
 
   printf("]\n");
 
@@ -177,13 +200,38 @@ static void printBinaryExpression(Node *node, size_t indent)
   printf("}\n");
 }
 
-static void printTupleType(Node *node, size_t indent)
+static void printUpdateExpression(Node *node, size_t indent)
 {
-  printf("TupleType [\n");
+  printf("UpdateExpression {\n");
 
-  printList(node->data.tupleType.elementTypes, indent + 1);
+  createIdentation(indent + 1);
+
+  printf("argument: {\n");
+
+  visitNode(node->data.updateExpression.argument, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
+  printf("operator: %s\n", node->data.updateExpression.operator);
+
+  createIdentation(indent + 1);
+
+  printf("prefix: %d\n", node->data.updateExpression.prefix);
 
   createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printTupleType(Node *node, size_t indent)
+{
+  printf("TupleType [");
+
+  visitNode(node->data.tupleType.elementTypes, indent + 1);
 
   printf("]\n");
 }
@@ -193,6 +241,359 @@ static void printArrayType(Node *node, size_t indent)
   printf("ArrayType {\n");
 
   visitNode(node->data.arrayType.elementType, indent + 1);
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printProgram(Node *node, size_t indent)
+{
+  printf("Program {\n");
+
+  createIdentation(indent + 1);
+
+  printf("body: [");
+
+  visitNode(node->data.program.body, indent + 1);
+
+  printf("]\n");
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printIfStatement(Node *node, size_t indent)
+{
+  printf("IfStatement {\n");
+
+  createIdentation(indent + 1);
+
+  printf("test: {\n");
+
+  visitNode(node->data.ifStatement.test, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
+  printf("consequent: {\n");
+
+  visitNode(node->data.ifStatement.consequent, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
+  printf("alternate: {");
+
+  Node *alternate = node->data.ifStatement.alternate;
+
+  if (alternate)
+  {
+    printf("\n");
+
+    visitNode(node->data.ifStatement.alternate, indent + 2);
+
+    createIdentation(indent + 1);
+  }
+
+  printf("}\n");
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printWhileStatement(Node *node, size_t indent)
+{
+  printf("WhileStatement {\n");
+
+  createIdentation(indent + 1);
+
+  printf("test: {\n");
+
+  visitNode(node->data.whileStatement.test, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
+  printf("body: {\n");
+
+  visitNode(node->data.whileStatement.body, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printForStatement(Node *node, size_t indent)
+{
+  printf("ForStatement {\n");
+
+  createIdentation(indent + 1);
+
+  printf("init: {\n");
+
+  visitNode(node->data.forStatement.init, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
+  printf("test: {\n");
+
+  visitNode(node->data.forStatement.test, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
+  printf("test: {\n");
+
+  visitNode(node->data.forStatement.update, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
+  printf("body: {\n");
+
+  visitNode(node->data.forStatement.body, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printAssignmentPattern(Node *node, size_t indent)
+{
+  printf("AssignmentPattern {\n");
+
+  createIdentation(indent + 1);
+
+  printf("left: {\n");
+
+  visitNode(node->data.assignmentPattern.left, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
+  printf("right: {\n");
+
+  visitNode(node->data.assignmentPattern.right, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printExpressionStatement(Node *node, size_t indent)
+{
+  printf("ExpressionStatement {\n");
+
+  createIdentation(indent + 1);
+
+  printf("expression: {\n");
+
+  visitNode(node->data.expressionStatement.expression, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printTypeAnnotation(Node *node, size_t indent)
+{
+  printf("TypeAnnotation {\n");
+
+  visitNode(node->data.typeAnnotation.typeAnnotation, indent + 1);
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printIdentifierNode(Node *node, size_t indent)
+{
+  printf("Identifer {\n");
+
+  createIdentation(indent + 1);
+
+  printf("name: %s\n", node->data.identifier.name);
+
+  Node *typeAnnotation = node->data.identifier.typeAnnotation;
+
+  if (typeAnnotation != NULL)
+  {
+    createIdentation(indent + 1);
+
+    printf("typeAnnotation: {\n");
+
+    visitNode(node->data.identifier.typeAnnotation, indent + 2);
+
+    createIdentation(indent + 1);
+
+    printf("}\n");
+  }
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printCallExpression(Node *node, size_t indent)
+{
+  printf("CallExpression {\n");
+
+  createIdentation(indent + 1);
+
+  printf("callee: {\n");
+
+  visitNode(node->data.callExpression.callee, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
+  printf("arguments: [");
+
+  visitNode(node->data.callExpression.arguments, indent + 1);
+
+  createIdentation(0);
+
+  printf("]\n");
+
+  if (node->data.callExpression.typeParameters)
+  {
+    visitNode(node->data.callExpression.typeParameters, indent + 2);
+  }
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printBlockStatement(Node *node, size_t indent)
+{
+  printf("BlockStatement {\n");
+
+  Node *body = node->data.block.body;
+
+  createIdentation(indent + 1);
+
+  printf("body: [");
+
+  visitNode(body, indent + 1);
+
+  printf("]\n");
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+static void printLiteral(Node *node, size_t indent)
+{
+  printf("Literal: %s\n", node->data.literal);
+}
+
+static void printStringLiteral(Node *node, size_t indent)
+{
+  printf("StringLiteral: %s\n", node->data.literal);
+}
+
+static void printNumericLiteral(Node *node, size_t indent)
+{
+  printf("NumericLiteral: %s\n", node->data.literal);
+}
+
+static void printVariableDeclarator(Node *node, size_t indent)
+{
+  printf("VariableDeclarator {\n");
+
+  createIdentation(indent + 1);
+
+  printf("id: {\n");
+
+  visitNode(node->data.variableDeclarator.id, indent + 2);
+
+  createIdentation(indent + 1);
+
+  printf("}\n");
+
+  createIdentation(indent + 1);
+
+  printf("init: {");
+
+  Node *init = node->data.variableDeclarator.init;
+
+  if (init)
+  {
+    printf("\n");
+
+    visitNode(init, indent + 2);
+
+    createIdentation(indent + 1);
+  }
+
+  printf("}\n");
+
+  createIdentation(indent);
+
+  printf("}\n");
+}
+
+void printVariableDeclaration(Node *node, size_t indent)
+{
+  printf("VariableDeclaration {\n");
+
+  createIdentation(indent + 1);
+
+  printf("kind: %s\n", node->data.variableDeclaration.kind);
+
+  createIdentation(indent + 1);
+
+  printf("declarations: [");
+
+  visitNode(node->data.variableDeclaration.declarations, indent + 1);
+
+  printf("]\n");
 
   createIdentation(indent);
 
@@ -211,252 +612,49 @@ void visitNode(Node *node, size_t indent)
   switch (node->type)
   {
   case ProgramNodeType:
-  {
-    printf("Program {\n");
-
-    createIdentation(indent + 1);
-
-    printf("body: [");
-
-    NodeList *body = node->data.program.body;
-
-    if (body->count > 0)
-    {
-      printf("\n");
-
-      printList(node->data.program.body, indent + 2);
-
-      createIdentation(indent + 1);
-    }
-    printf("]\n");
-
-    createIdentation(indent);
-
-    printf("}\n");
-
-    break;
-  }
+    return printProgram(node, indent);
+  case ReturnStatementNodeType:
+    return returnEmptyStatement(node, indent);
+  case EmptyStatementNodeType:
+    return printEmptyStatement(node, indent);
   case LiteralNodeType:
-    printf("Literal: %s\n", node->data.literal);
-
-    break;
+    return printLiteral(node, indent);
+  case NumericLiteralNodeType:
+    return printNumericLiteral(node, indent);
+  case StringLiteralNodeType:
+    return printStringLiteral(node, indent);
   case IdentifierNodeType:
-  {
-    printf("Identifer {\n");
-
-    createIdentation(indent + 1);
-
-    printf("name: %s\n", node->data.identifier.name);
-
-    Node *typeAnnotation = node->data.identifier.typeAnnotation;
-
-    if (typeAnnotation != NULL)
-    {
-      createIdentation(indent + 1);
-
-      printf("typeAnnotation: {\n");
-
-      visitNode(node->data.identifier.typeAnnotation, indent + 2);
-
-      createIdentation(indent + 1);
-
-      printf("}\n");
-    }
-
-    createIdentation(indent);
-
-    printf("}\n");
-
-    break;
-  }
+    return printIdentifierNode(node, indent);
   case TypeAnnotationNodeType:
-  {
-    printf("TypeAnnotation {\n");
-
-    visitNode(node->data.typeAnnotation.typeAnnotation, indent + 1);
-
-    createIdentation(indent);
-
-    printf("}\n");
-
-    break;
-  }
+    return printTypeAnnotation(node, indent);
+  case ExpressionStatementNodeType:
+    return printExpressionStatement(node, indent);
+  case IfStatementNodeType:
+    return printIfStatement(node, indent);
+  case WhileStatementNodeType:
+    return printWhileStatement(node, indent);
+  case ForStatementNodeType:
+    return printForStatement(node, indent);
   case AssignmentPatternNodeType:
-  {
-    printf("AssignmentPattern {\n");
-
-    createIdentation(indent + 1);
-
-    printf("left: {\n");
-
-    visitNode(node->data.assignmentPattern.left, indent + 2);
-
-    createIdentation(indent + 1);
-
-    printf("}\n");
-
-    createIdentation(indent + 1);
-
-    printf("right: {\n");
-
-    visitNode(node->data.assignmentPattern.right, indent + 2);
-
-    createIdentation(indent + 1);
-
-    printf("}\n");
-
-    createIdentation(indent);
-
-    printf("}\n");
-
-    break;
-  }
+    return printAssignmentPattern(node, indent);
   case CallExpressionNodeType:
-  {
-    printf("CallExpression {\n");
-
-    createIdentation(indent + 1);
-
-    printf("callee: {\n");
-
-    visitNode(node->data.callExpression.callee, indent + 2);
-
-    createIdentation(indent + 1);
-
-    printf("}\n");
-
-    createIdentation(indent + 1);
-
-    printf("arguments: [");
-
-    NodeList *args = node->data.callExpression.arguments;
-
-    if (args && args->count > 0)
-    {
-      printf("\n");
-      printList(args, indent + 2);
-    }
-
-    createIdentation(indent + 1);
-
-    printf("]\n");
-
-    if (node->data.callExpression.typeParameters)
-    {
-      visitNode(node->data.callExpression.typeParameters, indent + 2);
-    }
-
-    createIdentation(indent);
-
-    printf("}\n");
-
-    break;
-  }
+    return printCallExpression(node, indent);
   case BlockStatementNodeType:
-  {
-    printf("BlockStatement {\n");
-
-    LinkedList *list = node->data.block.body;
-
-    createIdentation(indent + 1);
-
-    printf("body: [");
-
-    if (list)
-    {
-      printf("\n");
-
-      printList(list, indent + 2);
-
-      createIdentation(indent + 1);
-    }
-
-    printf("]\n");
-
-    createIdentation(indent);
-
-    printf("}\n");
-
-    break;
-  }
+    return printBlockStatement(node, indent);
   case VariableDeclaratorNodeType:
-  {
-    printf("VariableDeclarator {\n");
-
-    createIdentation(indent + 1);
-
-    printf("id: {\n");
-
-    visitNode(node->data.variableDeclarator.id, indent + 2);
-
-    createIdentation(indent + 1);
-
-    printf("}\n");
-
-    createIdentation(indent + 1);
-
-    printf("init: {");
-
-    Node *init = node->data.variableDeclarator.init;
-
-    if (init)
-    {
-      printf("\n");
-
-      visitNode(init, indent + 2);
-
-      createIdentation(indent + 1);
-    }
-
-    printf("}\n");
-
-    createIdentation(indent);
-
-    printf("}\n");
-
-    break;
-  }
+    return printVariableDeclarator(node, indent);
   case VariableDeclarationNodeType:
-  {
-    printf("VariableDeclaration {\n");
-
-    createIdentation(indent + 1);
-
-    printf("kind: %s\n", node->data.variableDeclaration.kind);
-
-    createIdentation(indent + 1);
-
-    printf("declarations: [");
-
-    NodeList *declarations = node->data.variableDeclaration.declarations;
-
-    if (declarations)
-    {
-
-      printf("\n");
-
-      printList(declarations, indent + 2);
-
-      createIdentation(indent + 1);
-    }
-
-    printf("]\n");
-
-    createIdentation(indent);
-
-    printf("}\n");
-
-    break;
-  }
+    return printVariableDeclaration(node, indent);
   case NodeListNodeType:
   {
-    printf("NodeList [\n");
+    if (node->data.list->count)
+    {
+      printf("\n");
 
-    printList(node->data.list, indent + 1);
+      printList(node->data.list, indent + 1);
 
-    createIdentation(indent);
-
-    printf("]\n");
+      createIdentation(indent);
+    }
 
     break;
   }
@@ -496,14 +694,7 @@ void visitNode(Node *node, size_t indent)
 
     printf("members: [");
 
-    if (node->data.TypeLiteral.members->count > 0)
-    {
-      printf("\n");
-
-      printList(node->data.TypeLiteral.members, indent + 2);
-    }
-
-    createIdentation(indent + 1);
+    visitNode(node->data.TypeLiteral.members, indent + 1);
 
     printf("]\n");
 
@@ -523,11 +714,13 @@ void visitNode(Node *node, size_t indent)
     return printTypeReference(node, indent);
   case BinaryExpressionNodeType:
     return printBinaryExpression(node, indent);
+  case UpdateExpressionNodeType:
+    return printUpdateExpression(node, indent);
   case ErrorNodeType:
   {
     createIdentation(indent);
 
-    printf("Error: %s\n", node->data.error);
+    printf("Error: %s\n", node->data.error.msg);
 
     break;
   }

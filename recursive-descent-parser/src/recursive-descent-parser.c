@@ -11,7 +11,7 @@
 
 void tokenize(Lexer *lexer)
 {
-  Token *token = NULL;
+  Token *token = lexer->next(lexer);
 
   // token = peekToken(lexer);
 
@@ -21,13 +21,15 @@ void tokenize(Lexer *lexer)
   //   free(token);
   // }
 
-  while ((token = lexer->next(lexer)) != NULL)
+  while (token && token->type != TokenEOF)
   {
-    char *value = token->value;
+    if (token)
+    {
+      freeToken(token);
+      printf("token: %d\n", token->type);
+    }
 
-    printf("token: %s\n", value);
-
-    freeToken(token);
+    token = lexer->next(lexer);
   }
 
   printf("column %d\n", lexer->col);
@@ -53,8 +55,6 @@ int main(int argc, char *argv[])
 
   while ((c = fgetc(ptr)) != EOF)
   {
-    // if(!isWhiteSpace(c) && !isNewline(c)) input[length++] = c;
-
     input[length++] = c;
 
     if (length >= capacity)
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
   input = NULL;
 
-  // char *test = "i=10;+-\"string\"*! != ==; | || && & func :,<>?{}()[]=>";
+  // char *test = "\n\n\n\n\n\n\n\n";
 
   // Lexer *lexer = lexerFactory(&test);
 

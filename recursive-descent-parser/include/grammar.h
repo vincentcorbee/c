@@ -36,7 +36,6 @@ Node *propertyName(Lexer *lexer);
 Node *typeParameters(Lexer *lexer);
 Node *typeParameterList(Lexer *lexer);
 Node *typeParameter(Lexer *lexer);
-
 Node *variableDeclaration(Lexer *lexer);
 Node *letOrConst(Lexer *lexer);
 Node *variableBinding(Lexer *lexer);
@@ -44,77 +43,64 @@ Node *initializer(Lexer *lexer);
 
 Node *program(Lexer *lexer);
 
+/* Statements */
+
 Node *statements(Lexer *lexer);
-
+Node *statement(Lexer *lexer);
 Node *statementItem(Lexer *lexer);
-
 Node *blockStatement(Lexer *lexer);
-
-Node *declaration(Lexer *lexer);
-
-Node *functionDeclaration(Lexer *lexer);
-
-Node *arrowFunctionBody(Lexer *lexer);
-
-Node *functionBody(Lexer *lexer);
-
-Node *functionParameters(Lexer *lexer);
-
-Node *functionParametersList(Lexer *lexer);
+Node *expressionStatement(Lexer *lexer);
 
 Node *bindingList(Lexer *lexer);
 
-Node *lexicalBinding(Lexer *lexer);
+/* Declarations */
+Node *declaration(Lexer *lexer);
+Node *functionDeclaration(Lexer *lexer);
+Node *arrowFunctionBody(Lexer *lexer);
+Node *functionBody(Lexer *lexer);
+Node *functionParameters(Lexer *lexer);
+Node *functionParametersList(Lexer *lexer);
 
-Node *statement(Lexer *lexer);
-
-Node *expressionStatement(Lexer *lexer);
-
-Node *primaryExpression(Lexer *lexer);
-
+/* Expressions */
 Node *expression(Lexer *lexer);
-
+Node *primaryExpression(Lexer *lexer);
+Node *relationalExpression(Lexer *lexer);
 Node *assignmentExpression(Lexer *lexer);
-
 Node *leftHandSideExpression(Lexer *lexer);
-
 Node *memberExpression(Lexer *lexer);
-
 Node *conditionalExpression(Lexer *lexer);
-
 Node *equalityExpression(Lexer *lexer);
-
 Node *logicalAndExpression(Lexer *lexer);
-
 Node *logicalOrExpression(Lexer *lexer);
-
+Node *bitwiseOrExpression(Lexer *lexer);
+Node *bitwiseXOrExpression(Lexer *lexer);
+Node *bitwiseAndExpression(Lexer *lexer);
 Node *additiveExpression(Lexer *lexer);
-
 Node *multiplicativeExpression(Lexer *lexer);
+Node *updateExpression(Lexer *lexer);
+Node *coverParenthesizedExpression(Lexer *lexer);
+Node *callExpression(Lexer *lexer);
+
+// Node *pipeExpression(Lexer *lexer);
 
 Node *numericLiteral(Lexer *lexer);
-
 Node *stringLiteral(Lexer *lexer);
-
+// Node *arrayLiteral(Lexer *lexer);
 Node *literal(Lexer *lexer);
-
-Node *lexicalBinding(Lexer *lexer);
-
 Node *bindingIdentifier(Lexer *lexer);
-
 Node *identifier(Lexer *lexer);
-
 char *identifierStart(Lexer *lexer);
 
-Node *coverParenthesizedExpression(Lexer *lexer);
-
 Node *accessibiltyModifier(Lexer *lexer);
-
 Node *functionParameter(Lexer *lexer);
-
 Node *arguments(Lexer *lexer);
 Node *argumentsList(Lexer *lexer);
-Node *callExpression(Lexer *lexer);
+
+Node *ifStatement(Lexer *lexer);
+Node *whileStatement(Lexer *lexer);
+Node *forStatement(Lexer *lexer);
+Node *emptyStatement(Lexer *lexer);
+Node *returnStatement(Lexer *lexer);
 
 #undef grammar_IMPORT
 #undef GRAMMAR_EXTERN

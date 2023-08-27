@@ -1,1 +1,4 @@
-func foo<T>(a: T, b: T) => a + b;
+
+
+func foo () =>
+

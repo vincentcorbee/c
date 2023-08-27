@@ -12,15 +12,20 @@
 
 typedef enum
 {
+  TokenError = -1,
   TokenKeywordPublic,
   TokenKeywordPrivate,
   TokenTypeAlias,
   TokenKeywordString,
   TokenKeywordNumber,
-  TokenFunc,
+  TokenKeywordVoid,
+  TokenKeywordFunc,
   TokenPlus,
   TokenMinus,
   TokenMultiply,
+  TokenDivide,
+  TokenIncrement,
+  TokenDecrement,
   TokenLeftParen,
   TokenRightParen,
   TokenDoubleQuotedString,
@@ -34,6 +39,10 @@ typedef enum
   TokenRightCurlyBrace,
   TokenLeftBracket,
   TokenRightBracket,
+  TokenKeywordIf,
+  TokenKeywordElse,
+  TokenKeywordWhile,
+  TokenKeywordFor,
   TokenComma,
   TokenColon,
   TokenOptional,
@@ -41,14 +50,19 @@ typedef enum
   TokenBinaryAnd,
   TokenLogicalAnd,
   TokenBinaryOr,
+  TokenBinaryXOr,
   TokenLogicalOr,
   TokenNot,
   TokenEqual,
   TokenNotEqual,
   TokenEqualEqual,
+  TokenLesserThenOrEqual,
+  TokenGreaterThenOrEqual,
   TokenIdendifierStart,
   TokenKeywordLet,
-  TokenKeywordConst
+  TokenKeywordConst,
+  TokenKeywordReturn,
+  TokenEOF
 } TokenType;
 
 typedef enum
@@ -60,7 +74,13 @@ typedef enum
   KeywordPrivate,
   KeywordTypeAlias,
   KeywordString,
-  KeywordNumber
+  KeywordNumber,
+  KeywordVoid,
+  KeywordIf,
+  KeywordElse,
+  KeywordWhile,
+  KeywordFor,
+  KeywordReturn
 } Keyword;
 
 typedef struct Token

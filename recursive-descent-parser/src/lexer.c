@@ -9,49 +9,11 @@
 
 #include "lexer.h"
 
-/* Public functions */
+/* Private functions */
 
-Keywords keywords = {"func", "const", "let", "public", "private", "type", "string", "number"};
+static Keywords keywords = {"func", "const", "let", "public", "private", "type", "string", "number", "void", "if", "else", "while", "for", "return"};
 
-Lexer *lexerFactory(char **source)
-{
-  Lexer *lexer = malloc(sizeof(Lexer));
-
-  lexer->index = 0;
-  lexer->col = 1;
-  lexer->line = 1;
-
-  lexer->source = source;
-
-  lexer->next = nextToken;
-
-  lexer->peek = peekToken;
-
-  lexer->eatChar = eatChar;
-
-  lexer->skip = skipToken;
-
-  lexer->advance = advanceToken;
-
-  return lexer;
-}
-
-LexerState getLexerState(Lexer *self)
-{
-  LexerState state = {.source = *self->source, .line = self->line, .col = self->col, .index = self->index};
-
-  return state;
-}
-
-void setLexerState(Lexer *self, LexerState state)
-{
-  self->col = state.col;
-  self->line = state.line;
-  self->index = state.index;
-  *self->source = state.source;
-}
-
-char *eatChar(Lexer *self, int count)
+static char *eatChar(Lexer *self, int count)
 {
   char *buffer = malloc(count * sizeof(char) + 1);
 
@@ -71,7 +33,7 @@ char *eatChar(Lexer *self, int count)
   return buffer;
 }
 
-char *eatIdentiferStart(Lexer *self)
+static char *eatIdentiferStart(Lexer *self)
 {
   int index = 0;
 
@@ -112,7 +74,7 @@ char *eatIdentiferStart(Lexer *self)
   return idenifier;
 }
 
-char *eatDoubleQuotedString(Lexer *self)
+static char *eatDoubleQuotedString(Lexer *self)
 {
   int index = 0;
 
@@ -126,13 +88,21 @@ char *eatDoubleQuotedString(Lexer *self)
 
   string[index++] = eat(self->source);
 
+  self->col++;
+
   while (hasData(self->source) && !isDoubleQuotedString(**self->source))
   {
-    string = realloc(string, (index + 1) * sizeof(char) + 2);
-
-    string[index++] = eat(self->source);
+    string = realloc(string, (index + 1) * sizeof(char) + 1);
 
     self->col++;
+
+    if (isNewline(**self->source))
+    {
+      self->col = 1;
+      self->line++;
+    }
+
+    string[index++] = eat(self->source);
 
     self->index++;
   };
@@ -141,30 +111,26 @@ char *eatDoubleQuotedString(Lexer *self)
   {
     free(string);
 
-    self->col = col;
-
-    self->index = previousIndex;
-
-    *self->source = source;
-
     return NULL;
   }
 
   string[index++] = eat(self->source);
+
+  self->col++;
 
   string[index] = '\0';
 
   return string;
 }
 
-char *eatKeyword(Lexer *self, Keyword keywordType)
+static char *eatKeyword(Lexer *self, Keyword keywordType)
 {
   const char *keyword = keywords[keywordType];
 
   return eatChar(self, strlen(keyword));
 }
 
-char *eatInteger(Lexer *self)
+static char *eatInteger(Lexer *self)
 {
   char *value = malloc(sizeof(char));
 
@@ -186,158 +152,7 @@ char *eatInteger(Lexer *self)
   return value;
 }
 
-Token *tokenFactory(Lexer *self, TokenType type, char *value)
-{
-  Token *token = malloc(sizeof(Token));
-
-  token->type = type;
-
-  switch (type)
-  {
-  case TokenFunc:
-  case TokenKeywordPublic:
-  case TokenKeywordPrivate:
-  case TokenTypeAlias:
-  case TokenKeywordString:
-  case TokenKeywordNumber:
-  case TokenIdendifierStart:
-  case TokenKeywordLet:
-  case TokenKeywordConst:
-    token->value = value;
-    return token;
-  case TokenInteger:
-    token->value = eatInteger(self);
-    return token;
-  case TokenDoubleQuotedString:
-    token->value = eatDoubleQuotedString(self);
-    return token;
-  case TokenLogicalAnd:
-  case TokenLogicalOr:
-  case TokenEqualEqual:
-  case TokenNotEqual:
-  case TokenFatArrow:
-    token->value = eatChar(self, 2);
-    return token;
-  case TokenLeftParen:
-  case TokenRightParen:
-  case TokenMultiply:
-  case TokenPlus:
-  case TokenMinus:
-  case TokenEqual:
-  case TokenNot:
-  case TokenSemicolon:
-  case TokenBinaryOr:
-  case TokenBinaryAnd:
-  case TokenColon:
-  case TokenComma:
-  case TokenLeftAngleBracket:
-  case TokenRightAngleBracket:
-  case TokenLeftCurlyBrace:
-  case TokenRightCurlyBrace:
-  case TokenLeftBracket:
-  case TokenRightBracket:
-  case TokenOptional:
-    token->value = eatChar(self, 1);
-    return token;
-  default:
-    free(token);
-
-    return NULL;
-  }
-}
-
-TokenType peekToken(Lexer *self)
-{
-  if (!hasData(self->source))
-    return -1;
-
-  char *source = *self->source;
-  int col = self->col;
-
-  Token *token = nextToken(self);
-
-  *self->source = source;
-
-  self->col = col;
-
-  if (!token)
-    return -1;
-
-  TokenType type = token->type;
-
-  freeToken(token);
-
-  return type;
-}
-
-void skipToken(Lexer *self, int count)
-{
-  while (count)
-  {
-    Token *token = nextToken(self);
-
-    if (token == NULL)
-      break;
-
-    count--;
-
-    freeToken(token);
-  }
-}
-
-void advanceToken(Lexer *self)
-{
-  self->skip(self, 1);
-}
-
-int isKeyword(Lexer *self, Keyword keywordType)
-{
-  const char *keyword = keywords[keywordType];
-
-  size_t length = strlen(keyword);
-
-  int i;
-
-  for (i = 0; i < length; i++)
-  {
-    if (!hasData(self->source) || peekAt(self->source, i) != keyword[i])
-      return 0;
-  }
-
-  return 1;
-}
-
-int isKeywordTypeAlias(Lexer *self)
-{
-  return isKeyword(self, KeywordTypeAlias);
-}
-
-int isKeywordFunc(Lexer *self)
-{
-  return isKeyword(self, KeywordFunc);
-}
-
-int isKeywordPublic(Lexer *self)
-{
-  return isKeyword(self, KeywordPublic);
-}
-
-int isKeywordPrivate(Lexer *self)
-{
-  return isKeyword(self, KeywordPrivate);
-}
-
-int isKeywordString(Lexer *self)
-{
-  return isKeyword(self, KeywordString);
-}
-
-int isKeywordNumber(Lexer *self)
-{
-  return isKeyword(self, KeywordNumber);
-}
-
-Keyword getKeyword(char *input)
+static Keyword getKeyword(char *input)
 {
   int i = 0;
   int length = sizeof(keywords) / sizeof(keywords[0]);
@@ -353,7 +168,7 @@ Keyword getKeyword(char *input)
   return -1;
 }
 
-TokenType getKeywordOrIdentifierTokenType(char *value)
+static TokenType getKeywordOrIdentifierTokenType(char *value)
 {
   Keyword keyword = getKeyword(value);
 
@@ -363,11 +178,13 @@ TokenType getKeywordOrIdentifierTokenType(char *value)
   switch (keyword)
   {
   case KeywordFunc:
-    return TokenFunc;
+    return TokenKeywordFunc;
   case KeywordTypeAlias:
     return TokenTypeAlias;
   case KeywordLet:
     return TokenKeywordLet;
+  case keywordConst:
+    return TokenKeywordConst;
   case KeywordNumber:
     return TokenKeywordNumber;
   case KeywordPrivate:
@@ -376,15 +193,221 @@ TokenType getKeywordOrIdentifierTokenType(char *value)
     return TokenKeywordPublic;
   case KeywordString:
     return TokenKeywordString;
+  case KeywordVoid:
+    return TokenKeywordVoid;
+  case KeywordIf:
+    return TokenKeywordIf;
+  case KeywordElse:
+    return TokenKeywordElse;
+  case KeywordWhile:
+    return TokenKeywordWhile;
+  case KeywordFor:
+    return TokenKeywordFor;
+  case KeywordReturn:
+    return TokenKeywordReturn;
   default:
     return -1;
   }
 }
 
+static void eatMultiLineComment(Lexer *self)
+{
+  self->eatChar(self, 2);
+
+  while (!isMultiply(peekAt(self->source, 0)) && !isDivision(peekAt(self->source, 1)))
+  {
+    self->index++;
+    self->col++;
+
+    if (isNewline(**self->source))
+    {
+      self->line++;
+      self->col = 1;
+    }
+
+    self->eatChar(self, 1);
+  }
+
+  self->eatChar(self, 2);
+}
+
+static void eatSingleLineComment(Lexer *self)
+{
+  self->eatChar(self, 2);
+
+  while (!isNewline(**self->source))
+  {
+    self->index++;
+    self->col++;
+
+    self->eatChar(self, 1);
+  }
+}
+
+/* Public functions */
+
+Lexer *
+lexerFactory(char **source)
+{
+  Lexer *lexer = malloc(sizeof(Lexer));
+
+  lexer->index = 0;
+  lexer->col = 1;
+  lexer->line = 1;
+
+  lexer->current = NULL;
+
+  lexer->source = source;
+
+  lexer->next = nextToken;
+
+  lexer->peek = peekToken;
+
+  lexer->eatChar = eatChar;
+
+  lexer->skip = skipToken;
+
+  lexer->advance = advanceToken;
+
+  return lexer;
+}
+
+LexerState getLexerState(Lexer *self)
+{
+  LexerState state = {.source = *self->source, .line = self->line, .col = self->col, .index = self->index};
+
+  return state;
+}
+
+void setLexerState(Lexer *self, LexerState state)
+{
+  self->col = state.col;
+  self->line = state.line;
+  self->index = state.index;
+  *self->source = state.source;
+}
+
+Token *tokenFactory(Lexer *self, TokenType type, const char *value)
+{
+  Token *token = malloc(sizeof(Token));
+
+  token->type = type;
+
+  self->current = token;
+
+  switch (type)
+  {
+  case TokenKeywordFunc:
+  case TokenKeywordPublic:
+  case TokenKeywordPrivate:
+  case TokenTypeAlias:
+  case TokenKeywordString:
+  case TokenKeywordNumber:
+  case TokenKeywordVoid:
+  case TokenIdendifierStart:
+  case TokenKeywordLet:
+  case TokenKeywordConst:
+  case TokenKeywordIf:
+  case TokenKeywordElse:
+  case TokenKeywordWhile:
+  case TokenKeywordFor:
+  case TokenKeywordReturn:
+  case TokenEOF:
+  case TokenDoubleQuotedString:
+  case TokenInteger:
+    token->value = value;
+    return token;
+  case TokenLogicalAnd:
+  case TokenLogicalOr:
+  case TokenEqualEqual:
+  case TokenNotEqual:
+  case TokenFatArrow:
+  case TokenLesserThenOrEqual:
+  case TokenGreaterThenOrEqual:
+  case TokenIncrement:
+  case TokenDecrement:
+    token->value = eatChar(self, 2);
+    return token;
+  case TokenLeftParen:
+  case TokenRightParen:
+  case TokenMultiply:
+  case TokenDivide:
+  case TokenPlus:
+  case TokenMinus:
+  case TokenEqual:
+  case TokenNot:
+  case TokenSemicolon:
+  case TokenBinaryOr:
+  case TokenBinaryXOr:
+  case TokenBinaryAnd:
+  case TokenColon:
+  case TokenComma:
+  case TokenLeftAngleBracket:
+  case TokenRightAngleBracket:
+  case TokenLeftCurlyBrace:
+  case TokenRightCurlyBrace:
+  case TokenLeftBracket:
+  case TokenRightBracket:
+  case TokenOptional:
+    token->value = eatChar(self, 1);
+    return token;
+  case TokenError:
+    token->value = malloc(sizeof(char) * strlen(value));
+
+    strcpy(token->value, value);
+
+    return token;
+  default:
+    free(token);
+
+    return NULL;
+  }
+}
+
+TokenType peekToken(Lexer *self)
+{
+
+  if (isEOF(**self->source))
+    return TokenEOF;
+
+  LexerState state = getLexerState(self);
+
+  Token *token = nextToken(self);
+
+  setLexerState(self, state);
+
+  TokenType type = token->type;
+
+  freeToken(token);
+
+  return type;
+}
+
+void skipToken(Lexer *self, int count)
+{
+  while (count)
+  {
+    Token *token = nextToken(self);
+
+    if (token->type == TokenEOF)
+      break;
+
+    count--;
+
+    if (count)
+      freeToken(token);
+  }
+}
+
+void advanceToken(Lexer *self)
+{
+  self->skip(self, 1);
+}
+
 Token *nextToken(Lexer *self)
 {
-  if (!hasData(self->source))
-    return NULL;
+  if (isEOF(**self->source))
+    return tokenFactory(self, TokenEOF, NULL);
 
   char nextChar = peek(self->source);
 
@@ -418,6 +441,8 @@ Token *nextToken(Lexer *self)
 
     return tokenFactory(self, TokenBinaryAnd, NULL);
   }
+  case '^':
+    return tokenFactory(self, TokenBinaryXOr, NULL);
   case '|':
   {
     if (isBinaryOr(peekAt(self->source, 1)))
@@ -443,11 +468,36 @@ Token *nextToken(Lexer *self)
     return tokenFactory(self, TokenEqual, NULL);
   }
   case '+':
+  {
+    if (isPlus(peekAt(self->source, 1)))
+      return tokenFactory(self, TokenIncrement, NULL);
     return tokenFactory(self, TokenPlus, NULL);
+  }
   case '-':
+  {
+    if (isMinus(peekAt(self->source, 1)))
+      return tokenFactory(self, TokenDecrement, NULL);
     return tokenFactory(self, TokenMinus, NULL);
+  }
   case '*':
     return tokenFactory(self, TokenMultiply, NULL);
+  case '/':
+  {
+    if (isMultiply(peekAt(self->source, 1)))
+    {
+      eatMultiLineComment(self);
+
+      return self->next(self);
+    }
+    else if (isDivision(peekAt(self->source, 1)))
+    {
+      eatSingleLineComment(self);
+
+      return self->next(self);
+    }
+
+    return tokenFactory(self, TokenDivide, NULL);
+  }
   case ',':
     return tokenFactory(self, TokenComma, NULL);
   case ':':
@@ -461,9 +511,18 @@ Token *nextToken(Lexer *self)
   case '}':
     return tokenFactory(self, TokenRightCurlyBrace, NULL);
   case '<':
+  {
+    if (isEqual(peekAt(self->source, 1)))
+      return tokenFactory(self, TokenLesserThenOrEqual, NULL);
     return tokenFactory(self, TokenLeftAngleBracket, NULL);
+  }
   case '>':
+  {
+    if (isEqual(peekAt(self->source, 1)))
+      return tokenFactory(self, TokenGreaterThenOrEqual, NULL);
+
     return tokenFactory(self, TokenRightAngleBracket, NULL);
+  }
   case '[':
     return tokenFactory(self, TokenLeftBracket, NULL);
   case ']':
@@ -473,11 +532,19 @@ Token *nextToken(Lexer *self)
   case ';':
     return tokenFactory(self, TokenSemicolon, NULL);
   case '"':
-    return tokenFactory(self, TokenDoubleQuotedString, NULL);
+  {
+    char *str = eatDoubleQuotedString(self);
+
+    if (str == NULL)
+      return tokenFactory(self, TokenError, "Unterminated string literal");
+
+    return tokenFactory(self, TokenDoubleQuotedString, str);
+  }
+
   default:
   {
     if (isInteger(nextChar))
-      return tokenFactory(self, TokenInteger, NULL);
+      return tokenFactory(self, TokenInteger, eatInteger(self));
 
     if (isIdentifierStart(nextChar))
     {
@@ -488,5 +555,5 @@ Token *nextToken(Lexer *self)
   }
   }
 
-  return NULL;
+  return tokenFactory(self, TokenError, "Unexpected character");
 }

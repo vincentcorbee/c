@@ -51,38 +51,20 @@ Node *nodeFactory(NodeType type)
   return node;
 }
 
-Node *programNodeFactory(Node *list)
+Node *programNodeFactory(Node *body)
 {
   Node *node = nodeFactory(ProgramNodeType);
 
-  node->data.program.body = list->data.list;
-
-  free(list);
+  node->data.program.body = body;
 
   return node;
 }
 
-Node *errorNodeFactory(char *message, Lexer *lexer)
+Node *returnStatementNodeFactory(Node *argument)
 {
-  Node *node = nodeFactory(ErrorNodeType);
+  Node *node = nodeFactory(ReturnStatementNodeType);
 
-  size_t length = getCharacterCountInt(lexer->line) + getCharacterCountInt(lexer->col) + 1;
-
-  char line[length + 1];
-
-  char suffix[] = " on line ";
-
-  char result[strlen(suffix) + length + strlen(message) + 1];
-
-  sprintf(line, "%d:%d", lexer->line, lexer->col);
-
-  strcpy(result, message);
-
-  strcat(result, suffix);
-
-  strcat(result, line);
-
-  node->data.error = strdup(result);
+  node->data.returnStatement.argument = argument;
 
   return node;
 }
@@ -93,11 +75,9 @@ Node *typeAliasDeclarationNodeFactory(Node *id, Node *typeParameters, Node *type
 
   node->data.typeAliasDeclaration.id = id;
 
-  node->data.typeAliasDeclaration.typeParameters = typeParameters->data.list;
+  node->data.typeAliasDeclaration.typeParameters = typeParameters;
 
   node->data.typeAliasDeclaration.typeAnnotation = typeAnnotation;
-
-  free(typeParameters);
 
   return node;
 }
@@ -106,9 +86,7 @@ Node *tupleTypeNodeFactory(Node *elementTypes)
 {
   Node *node = nodeFactory(TupleTypeNodeType);
 
-  node->data.tupleType.elementTypes = elementTypes->data.list;
-
-  free(elementTypes);
+  node->data.tupleType.elementTypes = elementTypes;
 
   return node;
 }
@@ -131,9 +109,7 @@ Node *typeReferenceNodeFactory(Node *typeName, Node *typeParameters)
 
   node->data.typeReference.typeName = typeName;
 
-  node->data.typeReference.typeParameters = typeParameters->data.list;
-
-  free(typeParameters);
+  node->data.typeReference.typeParameters = typeParameters;
 
   return node;
 }
@@ -156,9 +132,7 @@ Node *TypeLiteralNodeFactory(Node *members)
 {
   Node *node = nodeFactory(TypeLiteralNodeType);
 
-  node->data.TypeLiteral.members = members->data.list;
-
-  free(members);
+  node->data.TypeLiteral.members = members;
 
   return node;
 }
@@ -172,9 +146,9 @@ Node *typeAnnotationNodeFactory(Node *typeAnnotation)
   return node;
 }
 
-Node *literalNodeFactory(Token *token)
+Node *literalNodeFactory(Token *token, NodeType type)
 {
-  Node *node = nodeFactory(LiteralNodeType);
+  Node *node = nodeFactory(type);
 
   char *value = token->value;
 
@@ -215,7 +189,7 @@ Node *variableDeclarationNodeFactory(Node *kind, Node *declarations)
 
   node->data.variableDeclaration.kind = kind->data.literal;
 
-  node->data.variableDeclaration.declarations = declarations->data.list;
+  node->data.variableDeclaration.declarations = declarations;
 
   return node;
 }
@@ -237,11 +211,9 @@ Node *callExpressionNodeFactory(Node *callee, Node *arguments, Node *typeParamet
 
   node->data.callExpression.callee = callee;
 
-  node->data.callExpression.arguments = arguments->data.list;
+  node->data.callExpression.arguments = arguments;
 
   node->data.callExpression.typeParameters = typeParameters;
-
-  free(arguments);
 
   return node;
 }
@@ -257,45 +229,62 @@ Node *variableDeclaratorNodeFactory(Node *id, Node *init)
   return node;
 }
 
-Node *functionDeclarationNodeFactory(Node *id, Node *params, Node *body, Node *typeParameters)
+Node *functionDeclarationNodeFactory(Node *id, Node *params, Node *body, Node *typeParameters, Node *returnType)
 {
   Node *node = nodeFactory(FunctionDeclarationNodeType);
 
   node->data.functionDeclaration.id = id;
 
-  node->data.functionDeclaration.params = params->data.list;
+  node->data.functionDeclaration.params = params;
 
-  node->data.functionDeclaration.body = body->data.list;
+  node->data.functionDeclaration.body = body;
 
   node->data.functionDeclaration.typeParameters = typeParameters;
 
-  free(params);
-
-  free(body);
+  node->data.functionDeclaration.returnType = returnType;
 
   return node;
 }
 
-Node *binaryExpressionNodeFactory(Node *left, char *operator, Node * right)
+Node *binaryExpressionNodeFactory(Node *left, Token *operator, Node * right)
 {
   Node *node = nodeFactory(BinaryExpressionNodeType);
 
+  char *value = operator->value;
+
   node->data.binary.left = left;
 
-  node->data.binary.operator= operator;
+  node->data.binary.operator= value;
 
   node->data.binary.right = right;
+
+  free(operator);
 
   return node;
 }
 
-Node *blockStatementNodeFactory(Node *list)
+Node *updateExpressionNodeFactory(Node *argument, Token *operator, int prefix)
+{
+  Node *node = nodeFactory(UpdateExpressionNodeType);
+
+  char *value = operator->value;
+
+  node->data.updateExpression.argument = argument;
+
+  node->data.updateExpression.operator= value;
+
+  node->data.updateExpression.prefix = prefix;
+
+  free(operator);
+
+  return node;
+}
+
+Node *blockStatementNodeFactory(Node *body)
 {
   Node *node = nodeFactory(BlockStatementNodeType);
 
-  node->data.block.body = list != NULL ? list->data.list : NULL;
-
-  free(list);
+  node->data.block.body = body;
 
   return node;
 }
@@ -311,13 +300,97 @@ Node *identifierNodeFactory(char *name, Node *typeAnnotation)
   return node;
 }
 
+Node *ifStatementNodeFactory(Node *test, Node *consequent, Node *alternate)
+{
+  Node *node = nodeFactory(IfStatementNodeType);
+
+  node->data.ifStatement.test = test;
+
+  node->data.ifStatement.consequent = consequent;
+
+  node->data.ifStatement.alternate = alternate;
+
+  return node;
+}
+
+Node *whileStatementNodeFactory(Node *test, Node *body)
+{
+  Node *node = nodeFactory(WhileStatementNodeType);
+
+  node->data.whileStatement.test = test;
+
+  node->data.whileStatement.body = body;
+
+  return node;
+}
+
+Node *forStatementNodeFactory(Node *test, Node *init, Node *update, Node *body)
+{
+  Node *node = nodeFactory(ForStatementNodeType);
+
+  node->data.forStatement.test = test;
+
+  node->data.forStatement.init = init;
+
+  node->data.forStatement.update = update;
+
+  node->data.forStatement.body = body;
+
+  return node;
+}
+
+Node *expressionStatementNodeFactory(Node *expression)
+{
+  Node *node = nodeFactory(ExpressionStatementNodeType);
+
+  node->data.expressionStatement.expression = expression;
+
+  return node;
+}
+
+Node *emptyStatementNodeFactory(void)
+{
+  Node *node = nodeFactory(EmptyStatementNodeType);
+
+  return node;
+}
+
+Node *errorNodeFactory(char *message, Lexer *lexer, ErrorType errorType)
+{
+  Node *node = nodeFactory(ErrorNodeType);
+
+  size_t length = getCharacterCountInt(lexer->line) + getCharacterCountInt(lexer->col) + 1;
+
+  char line[length + 1];
+
+  char suffix[] = " on line ";
+
+  char result[strlen(suffix) + length + strlen(message) + 1];
+
+  sprintf(line, "%d:%d", lexer->line, lexer->col);
+
+  strcpy(result, message);
+
+  strcat(result, suffix);
+
+  strcat(result, line);
+
+  node->data.error.msg = strdup(result);
+  node->data.error.type = !errorType ? SyntacticalError : errorType;
+
+  return node;
+}
+
 void freeNode(Node *node)
 {
+  if (!node)
+    return;
+
   switch (node->type)
   {
   case ProgramNodeType:
   {
-    freeList(node->data.program.body);
+    freeNode(node->data.program.body);
 
     free(node);
 
@@ -325,7 +398,7 @@ void freeNode(Node *node)
   }
   case BlockStatementNodeType:
   {
-    freeList(node->data.block.body);
+    freeNode(node->data.block.body);
 
     free(node);
 
@@ -341,9 +414,9 @@ void freeNode(Node *node)
   }
   case FunctionDeclarationNodeType:
   {
-    freeList(node->data.functionDeclaration.body);
+    freeNode(node->data.functionDeclaration.body);
 
-    freeList(node->data.functionDeclaration.params);
+    freeNode(node->data.functionDeclaration.params);
 
     free(node);
 
@@ -362,7 +435,7 @@ void freeNode(Node *node)
     break;
   }
   case ErrorNodeType:
-    free(node->data.error);
+    free(node->data.error.msg);
 
     free(node);
 

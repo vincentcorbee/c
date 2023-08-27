@@ -6,7 +6,8 @@
 
 void freeToken(Token *token)
 {
-  free(token->value);
+  if (token->value != NULL)
+    free(token->value);
 
   free(token);
 }
