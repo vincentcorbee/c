@@ -43,7 +43,9 @@ Lexer *lexerFactory(char **source);
 
 Token *tokenFactory(Lexer *self, TokenType type, const char *value);
 
-TokenType peekToken(Lexer *self);
+TokenType peekTokenType(Lexer *self);
+
+Token *peekToken(Lexer *self);
 
 Token *nextToken(Lexer *self);
 

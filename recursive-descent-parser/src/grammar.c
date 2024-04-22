@@ -112,7 +112,7 @@ static Node *parseBinaryExpression(Lexer *lexer, ParseFunction parseLeft, IsOper
 Node *typeAnnotation(Lexer *lexer)
 {
   if (lexer->peek(lexer) != TokenColon)
-    return errorNodeFactory("Expected ':'", lexer, NULL);
+    return errorNodeFactory("Expected ':'", lexer);
 
   lexer->advance(lexer);
 
@@ -245,14 +245,12 @@ Node *predefinedType(Lexer *lexer)
   {
   case TokenInteger:
   case TokenDoubleQuotedString:
-    return literalNodeFactory(lexer->next(lexer), LiteralNodeType);
-    return literalNodeFactory(lexer->next(lexer), LiteralNodeType);
   case TokenKeywordVoid:
   case TokenKeywordNumber:
   case TokenKeywordString:
     return literalNodeFactory(lexer->next(lexer), LiteralNodeType);
   default:
-    return errorNodeFactory("Unexpected literal type", lexer, NULL);
+    return errorNodeFactory("Unexpected literal type", lexer);
   }
 }
 
@@ -272,7 +270,7 @@ Node *arrayType(Lexer *lexer, Node *pt)
     {
       freeNode(at);
 
-      return errorNodeFactory("Expected ']'", lexer, NULL);
+      return errorNodeFactory("Expected ']'", lexer);
     }
 
     lexer->advance(lexer);
@@ -290,7 +288,7 @@ Node *arrayType(Lexer *lexer, Node *pt)
 Node *tupleType(Lexer *lexer)
 {
   if (lexer->peek(lexer) != TokenLeftBracket)
-    return errorNodeFactory("Expected '['", lexer, NULL);
+    return errorNodeFactory("Expected '['", lexer);
 
   lexer->advance(lexer);
 
@@ -300,7 +298,7 @@ Node *tupleType(Lexer *lexer)
   {
     freeNode(tl);
 
-    return errorNodeFactory("Expected ']'", lexer, NULL);
+    return errorNodeFactory("Expected ']'", lexer);
   }
 
   lexer->advance(lexer);
@@ -374,7 +372,7 @@ Node *typeReference(Lexer *lexer)
 Node *TypeLiteral(Lexer *lexer)
 {
   if (lexer->peek(lexer) != TokenLeftCurlyBrace)
-    return errorNodeFactory("Expected '{'", lexer, NULL);
+    return errorNodeFactory("Expected '{'", lexer);
 
   lexer->advance(lexer);
 
@@ -387,7 +385,7 @@ Node *TypeLiteral(Lexer *lexer)
   {
     freeNode(body);
 
-    return errorNodeFactory("Expected '}'", lexer, NULL);
+    return errorNodeFactory("Expected '}'", lexer);
   }
 
   lexer->advance(lexer);
@@ -410,7 +408,7 @@ Node *typeBody(Lexer *lexer)
   {
     freeNode(tml);
 
-    return errorNodeFactory("Expected ';' | ','", lexer, NULL);
+    return errorNodeFactory("Expected ';' | ','", lexer);
   }
 
   lexer->advance(lexer);
@@ -572,7 +570,7 @@ Node *propertyName(Lexer *lexer)
 Node *typeParameters(Lexer *lexer)
 {
   if (lexer->peek(lexer) != TokenLeftAngleBracket)
-    return errorNodeFactory("Expected '<'", lexer, NULL);
+    return errorNodeFactory("Expected '<'", lexer);
 
   lexer->advance(lexer);
 
@@ -589,7 +587,7 @@ Node *typeParameters(Lexer *lexer)
   {
     freeNode(tp);
 
-    return errorNodeFactory("Expected '>'", lexer, NULL);
+    return errorNodeFactory("Expected '>'", lexer);
   }
 
   lexer->advance(lexer);
@@ -637,7 +635,7 @@ Node *typeParameter(Lexer *lexer)
 Node *typeAliasDeclaration(Lexer *lexer)
 {
   if (lexer->peek(lexer) != TokenTypeAlias)
-    return errorNodeFactory("Expected 'type'", lexer, NULL);
+    return errorNodeFactory("Expected 'type'", lexer);
 
   lexer->advance(lexer);
 
@@ -654,7 +652,7 @@ Node *typeAliasDeclaration(Lexer *lexer)
   }
 
   if (lexer->peek(lexer) != TokenEqual)
-    return errorNodeFactory("Expected '='", lexer, NULL);
+    return errorNodeFactory("Expected '='", lexer);
 
   lexer->advance(lexer);
 
@@ -684,7 +682,7 @@ Node *typeAliasDeclaration(Lexer *lexer)
 
     freeNode(tp);
 
-    return errorNodeFactory("Expected ';'", lexer, NULL);
+    return errorNodeFactory("Expected ';'", lexer);
   }
 
   lexer->advance(lexer);
@@ -719,10 +717,6 @@ Node *statements(Lexer *lexer)
 
     statements->add(statements, si);
 
-    printf("---%s\n", lexer->current->value);
-
-    printf("---%s\n", *lexer->source);
-
     if (si->type == ErrorNodeType)
     {
       while (nextToken != TokenSemicolon && nextToken != TokenEOF)
@@ -756,7 +750,7 @@ Node *statementItem(Lexer *lexer)
 
   Node *d = declaration(lexer);
 
-  printf("%s\n", s->data.error.msg);
+  printf("ERROR -> %s\n", s->data.error.msg);
 
   if (d == NULL)
     return s;
@@ -777,33 +771,23 @@ Node *statementItem(Lexer *lexer)
 */
 Node *statement(Lexer *lexer)
 {
-  Node *st = NULL;
-
   switch (lexer->peek(lexer))
   {
   case TokenSemicolon:
-    st = emptyStatement(lexer);
-    break;
+    return emptyStatement(lexer);
   case TokenLeftCurlyBrace:
-    st = blockStatement(lexer);
-    break;
+    return blockStatement(lexer);
   case TokenKeywordIf:
-    st = ifStatement(lexer);
-    break;
+    return ifStatement(lexer);
   case TokenKeywordWhile:
-    st = whileStatement(lexer);
-    break;
+    return whileStatement(lexer);
   case TokenKeywordFor:
-    st = forStatement(lexer);
-    break;
+    return forStatement(lexer);
   case TokenKeywordReturn:
-    st = returnStatement(lexer);
-    break;
+    return returnStatement(lexer);
   default:
-    st = expressionStatement(lexer);
+    return expressionStatement(lexer);
   }
-
-  return st;
 }
 
 /*
@@ -838,7 +822,7 @@ Node *returnStatement(Lexer *lexer)
     if (arg)
       freeNode(arg);
 
-    return errorNodeFactory("Expected ';'", lexer, NULL);
+    return errorNodeFactory("Expected ';'", lexer);
   }
 
   lexer->advance(lexer);
@@ -896,6 +880,9 @@ Node *ifStatement(Lexer *lexer)
 */
 Node *whileStatement(Lexer *lexer)
 {
+  if (lexer->peek(lexer) != TokenKeywordWhile)
+    return errorNodeFactory("Expected 'while'", lexer);
+
   lexer->advance(lexer);
 
   Node *test = coverParenthesizedExpression(lexer);
@@ -911,6 +898,7 @@ Node *whileStatement(Lexer *lexer)
 
     return body;
   }
+
   return whileStatementNodeFactory(test, body);
 }
 
@@ -922,12 +910,12 @@ Node *whileStatement(Lexer *lexer)
 Node *forStatement(Lexer *lexer)
 {
   if (lexer->peek(lexer) != TokenKeywordFor)
-    return errorNodeFactory("Expected 'for'", lexer, NULL);
+    return errorNodeFactory("Expected 'for'", lexer);
 
   lexer->advance(lexer);
 
   if (lexer->peek(lexer) != TokenLeftParen)
-    return errorNodeFactory("Expected '('", lexer, NULL);
+    return errorNodeFactory("Expected '('", lexer);
 
   lexer->advance(lexer);
 
@@ -946,7 +934,7 @@ Node *forStatement(Lexer *lexer)
     if (init)
       freeNode(init);
 
-    return errorNodeFactory("Expected ';'", lexer, NULL);
+    return errorNodeFactory("Expected ';'", lexer);
   }
 
   if (!init || init->type != VariableDeclarationNodeType)
@@ -973,7 +961,7 @@ Node *forStatement(Lexer *lexer)
     if (test)
       freeNode(test);
 
-    return errorNodeFactory("Expected ';'", lexer, NULL);
+    return errorNodeFactory("Expected ';'", lexer);
   }
 
   lexer->advance(lexer);
@@ -996,7 +984,7 @@ Node *forStatement(Lexer *lexer)
   }
 
   if (lexer->peek(lexer) != TokenRightParen)
-    return errorNodeFactory("Expected ')'", lexer, NULL);
+    return errorNodeFactory("Expected ')'", lexer);
 
   lexer->advance(lexer);
 
@@ -1035,7 +1023,7 @@ Node *blockStatement(Lexer *lexer)
       {
         freeNode(body);
 
-        return errorNodeFactory("Expected '}'", lexer, NULL);
+        return errorNodeFactory("Expected '}'", lexer);
       }
 
       lexer->advance(lexer);
@@ -1045,7 +1033,7 @@ Node *blockStatement(Lexer *lexer)
   }
   else
   {
-    return errorNodeFactory("Expected '{'", lexer, NULL);
+    return errorNodeFactory("Expected '{'", lexer);
   }
 }
 
@@ -1099,7 +1087,7 @@ Node *variableDeclaration(Lexer *lexer)
 
     freeNode(bl);
 
-    return errorNodeFactory("Expected ';'", lexer, NULL);
+    return errorNodeFactory("Expected ';'", lexer);
   }
 
   lexer->advance(lexer);
@@ -1115,15 +1103,25 @@ Node *variableDeclaration(Lexer *lexer)
 
 Node *letOrConst(Lexer *lexer)
 {
-  switch (lexer->peek(lexer))
+  TokenType type = lexer->peek(lexer);
+
+  switch (type)
   {
   case TokenKeywordLet:
   case TokenKeywordConst:
     return literalNodeFactory(lexer->next(lexer), LiteralNodeType);
   case TokenError:
-    return errorNodeFactory(lexer->next(lexer)->value, lexer, LexicalError);
+  {
+    Token *tok = lexer->next(lexer);
+
+    char *value = tok->value;
+
+    free(tok);
+
+    return errorNodeFactory(value, lexer, LexicalError);
+  }
   default:
-    return errorNodeFactory("Expected 'let' | 'const'", lexer, NULL);
+    return errorNodeFactory("Expected 'let' | 'const'", lexer);
   }
 }
 
@@ -1197,7 +1195,7 @@ Node *variableBinding(Lexer *lexer)
 Node *initializer(Lexer *lexer)
 {
   if (lexer->peek(lexer) != TokenEqual)
-    return errorNodeFactory("Expected '='", lexer, NULL);
+    return errorNodeFactory("Expected '='", lexer);
 
   lexer->advance(lexer);
 
@@ -1259,7 +1257,7 @@ Node *functionDeclaration(Lexer *lexer)
 
       freeNode(params);
 
-      return errorNodeFactory("Expected '=>'", lexer, NULL);
+      return errorNodeFactory("Expected '=>'", lexer);
     }
 
     lexer->advance(lexer);
@@ -1269,7 +1267,7 @@ Node *functionDeclaration(Lexer *lexer)
     return functionDeclarationNodeFactory(id, params, body, tp, rt);
   }
   else
-    return errorNodeFactory("Expected 'func'", lexer, NULL);
+    return errorNodeFactory("Expected 'func'", lexer);
 }
 
 /*
@@ -1290,7 +1288,7 @@ Node *arrowFunctionBody(Lexer *lexer)
     {
       freeNode(body);
 
-      return errorNodeFactory("Expected '}'", lexer, NULL);
+      return errorNodeFactory("Expected '}'", lexer);
     }
 
     lexer->advance(lexer);
@@ -1317,7 +1315,7 @@ Node *functionBody(Lexer *lexer)
 Node *functionParameters(Lexer *lexer)
 {
   if (lexer->peek(lexer) != TokenLeftParen)
-    return errorNodeFactory("Expected (", lexer, NULL);
+    return errorNodeFactory("Expected (", lexer);
 
   lexer->advance(lexer);
 
@@ -1335,7 +1333,7 @@ Node *functionParameters(Lexer *lexer)
     {
       freeNode(parameters);
 
-      return errorNodeFactory("Expected )", lexer, NULL);
+      return errorNodeFactory("Expected )", lexer);
     }
   }
 
@@ -1412,7 +1410,7 @@ Node *expressionStatement(Lexer *lexer)
   {
     freeNode(exp);
 
-    return errorNodeFactory("Expected ';'", lexer, NULL);
+    return errorNodeFactory("Expected ';'", lexer);
   }
 
   lexer->advance(lexer);
@@ -1443,15 +1441,13 @@ Node *assignmentExpression(Lexer *lexer)
   if (ce->type != ErrorNodeType || ce->data.error.type == LexicalError)
     return ce;
 
-  printf("-%s\n", ce->data.error.msg);
-
-  printf("-%d\n", ce->data.error.type);
-
   setLexerState(lexer, state);
 
   freeNode(ce);
 
   Node *lhse = leftHandSideExpression(lexer);
+
+  printf("SOURCE -> %s\n", *lexer->source);
 
   if (lhse->type == ErrorNodeType)
     return lhse;
@@ -1559,7 +1555,7 @@ Node *arguments(Lexer *lexer)
   {
     freeNode(al);
 
-    return errorNodeFactory("Expected ')'", lexer, NULL);
+    return errorNodeFactory("Expected ')'", lexer);
   }
 
   lexer->advance(lexer);
@@ -1717,7 +1713,9 @@ Node *primaryExpression(Lexer *lexer)
 */
 Node *literal(Lexer *lexer)
 {
-  switch (lexer->peek(lexer))
+  TokenType tokenType = lexer->peek(lexer);
+
+  switch (tokenType)
   {
   case TokenInteger:
     return numericLiteral(lexer);
@@ -1725,21 +1723,27 @@ Node *literal(Lexer *lexer)
     return stringLiteral(lexer);
   case TokenIdendifierStart:
     return identifier(lexer);
+  case TokenEOF:
+    return errorNodeFactory("Unexpected token", lexer);
   case TokenError:
-    return errorNodeFactory(lexer->next(lexer)->value, lexer, LexicalError);
+  {
+    Token *tok = peekToken(lexer);
+
+    char *value = tok->value;
+
+    free(tok);
+
+    return errorNodeFactory(value, lexer, LexicalError);
+  }
   default:
   {
-    char a[] = "Unexpected character";
+    Token *tok = peekToken(lexer);
 
-    char b[3] = {' ', peek(lexer->source), '\0'};
+    char *value = tok->value;
 
-    char message[strlen(a) + strlen(b) + 1];
+    free(tok);
 
-    strcpy(message, a);
-
-    strcat(message, b);
-
-    return errorNodeFactory(message, lexer, NULL);
+    return errorNodeFactory(value, lexer);
   }
   }
 }
@@ -1793,14 +1797,12 @@ Node *bindingIdentifier(Lexer *lexer)
 */
 Node *identifier(Lexer *lexer)
 {
-  char *start = identifierStart(lexer);
+  char *is = identifierStart(lexer);
 
-  if (start == NULL)
-    return errorNodeFactory("Expected identifier", lexer, NULL);
+  if (is == NULL)
+    return errorNodeFactory("Expected identifier", lexer);
 
-  Node *node = identifierNodeFactory(start, NULL);
-
-  return node;
+  return identifierNodeFactory(is, NULL);
 }
 
 /*
@@ -1829,6 +1831,9 @@ char *identifierStart(Lexer *lexer)
 */
 Node *coverParenthesizedExpression(Lexer *lexer)
 {
+  if (lexer->peek(lexer) != TokenLeftParen)
+    return errorNodeFactory("Expected (", lexer);
+
   lexer->advance(lexer);
 
   Node *e = expression(lexer);
@@ -1837,7 +1842,7 @@ Node *coverParenthesizedExpression(Lexer *lexer)
   {
     freeNode(e);
 
-    return errorNodeFactory("CoverParenthesizedExpression expected )", lexer, NULL);
+    return errorNodeFactory("Expected )", lexer);
   }
 
   lexer->advance(lexer);

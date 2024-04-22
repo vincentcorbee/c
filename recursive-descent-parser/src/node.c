@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <stdarg.h>
 
 #define node_IMPORT
 
@@ -355,28 +356,32 @@ Node *emptyStatementNodeFactory(void)
   return node;
 }
 
-Node *errorNodeFactory(char *message, Lexer *lexer, ErrorType errorType)
+Node *errorNodeFactory(const char *message, Lexer *lexer, ...)
 {
   Node *node = nodeFactory(ErrorNodeType);
 
-  size_t length = getCharacterCountInt(lexer->line) + getCharacterCountInt(lexer->col) + 1;
+  char *suffix = " on line ";
 
-  char line[length + 1];
+  size_t length = getCharacterCountInt(lexer->line) + getCharacterCountInt(lexer->col) + strlen(message) + strlen(suffix) + 1;
 
-  char suffix[] = " on line ";
+  char result[length];
 
-  char result[strlen(suffix) + length + strlen(message) + 1];
+  sprintf(result, "%s%s%d:%d", message, suffix, lexer->line, lexer->col);
 
-  sprintf(line, "%d:%d", lexer->line, lexer->col);
+  va_list args;
 
-  strcpy(result, message);
+  va_start(args, lexer);
 
-  strcat(result, suffix);
+  ErrorType errorType = va_arg(args, ErrorType);
 
-  strcat(result, line);
+  va_end(args);
+
+  printf("%d\n", errorType);
 
   node->data.error.msg = strdup(result);
   node->data.error.type = !errorType ? SyntacticalError : errorType;
+
+  fprintf(stderr, "%s\n", result);
 
   return node;
 }
@@ -469,6 +474,8 @@ void freeNode(Node *node)
   case TypeLiteralNodeType:
   case TypeAnnotationNodeType:
   {
+    free(node);
+
     break;
   }
   }

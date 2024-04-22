@@ -247,7 +247,7 @@ typedef struct Node
 /* Function prototypes */
 
 Node *nodeFactory(NodeType type);
-Node *errorNodeFactory(char *message, Lexer *lexer, ErrorType errorType);
+Node *errorNodeFactory(const char *message, Lexer *lexer, ...);
 
 Node *programNodeFactory(Node *body);
 Node *literalNodeFactory(Token *token, NodeType type);
@@ -266,13 +266,21 @@ Node *tupleTypeNodeFactory(Node *elementTypes);
 Node *typeReferenceNodeFactory(Node *typeName, Node *typeParametes);
 Node *propertySignatureNodeFactory(Node *key, int optiona, Node *typeAnnotation);
 Node *TypeLiteralNodeFactory(Node *members);
+
 Node *typeAnnotationNodeFactory(Node *typeAnnotation);
+
 Node *callExpressionNodeFactory(Node *callee, Node *arguments, Node *typeParameters);
+
 Node *ifStatementNodeFactory(Node *test, Node *consequent, Node *alternate);
+
 Node *whileStatementNodeFactory(Node *test, Node *body);
+
 Node *forStatementNodeFactory(Node *init, Node *test, Node *update, Node *body);
+
 Node *expressionStatementNodeFactory(Node *expression);
+
 Node *emptyStatementNodeFactory(void);
+
 Node *returnStatementNodeFactory(Node *argument);
 
 void freeNode(Node *node);

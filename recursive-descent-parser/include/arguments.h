@@ -1,7 +1,6 @@
 #ifndef arguments_H
 #define arguments_H
 
-/* Set EXTERN macro: */
 #ifdef arguments_IMPORT
 #define EXTERN
 #else

@@ -718,7 +718,6 @@ void visitNode(Node *node, size_t indent)
     return printUpdateExpression(node, indent);
   case ErrorNodeType:
   {
-    createIdentation(indent);
 
     printf("Error: %s\n", node->data.error.msg);
 
@@ -727,8 +726,34 @@ void visitNode(Node *node, size_t indent)
   }
 }
 
+typedef struct Parser
+{
+  Token *current;
+  Token *previous;
+  void (*advance)(void);
+} Parser;
+
+Parser parser;
+
+static void advance()
+{
+  parser.previous = parser.current;
+
+  while (1)
+  {
+    // parser.current = scanToken();
+
+    if (parser.current->type != TokenError)
+      break;
+
+    // errorAtCurrent(parser.current.start);
+  }
+}
+
 Node *parse(char **source)
 {
+  Parser parser = {.current = NULL, .previous = NULL, .advance = advance};
+
   Lexer *lexer = lexerFactory(source);
 
   Node *tree = program(lexer);

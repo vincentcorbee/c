@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Including own header for checking by compiler */
 #define arguments_IMPORT
 
 #include "arguments.h"

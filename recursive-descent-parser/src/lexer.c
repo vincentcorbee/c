@@ -261,7 +261,7 @@ lexerFactory(char **source)
 
   lexer->next = nextToken;
 
-  lexer->peek = peekToken;
+  lexer->peek = peekTokenType;
 
   lexer->eatChar = eatChar;
 
@@ -364,7 +364,7 @@ Token *tokenFactory(Lexer *self, TokenType type, const char *value)
   }
 }
 
-TokenType peekToken(Lexer *self)
+TokenType peekTokenType(Lexer *self)
 {
 
   if (isEOF(**self->source))
@@ -381,6 +381,21 @@ TokenType peekToken(Lexer *self)
   freeToken(token);
 
   return type;
+}
+
+Token *peekToken(Lexer *self)
+{
+
+  if (isEOF(**self->source))
+    return TokenEOF;
+
+  LexerState state = getLexerState(self);
+
+  Token *token = nextToken(self);
+
+  setLexerState(self, state);
+
+  return token;
 }
 
 void skipToken(Lexer *self, int count)

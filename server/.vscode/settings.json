@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "*.html": "html",
+    "_sa_family_t.h": "c",
+    "types.h": "c"
+  }
+}
